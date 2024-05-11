@@ -11,8 +11,11 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@koa/cors": "^5.0.0",
     "forever": "^0.14.2",
     "koa": "^2.15.3",
-    "koa-body": "^6.0.1"
+    "koa-body": "^6.0.1",
+    "koa-static": "^5.0.0",
+    "uuid": "^9.0.1"
   }
 }
