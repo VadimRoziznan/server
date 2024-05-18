@@ -10,8 +10,9 @@ const fs = require('fs');
 const cors = require('@koa/cors');
 
 const tickets = [
-  {id: '6226b804-0b73-47c5-adcc-a62ce79a2b26', name: 'Выучить английский', description: 'sdvase', date: '11.05.2024 17:52'},
-  {id: '1aab2c9d-1149-4aa1-a3ef-97bd3c2b3e8a', name: 'Выучить китайский', description: 'aefefefe', date: '11.05.2024 17:53'}
+  {id: '6226b804-0b73-47c5-adcc-a62ce79a2b26', name: 'Выучить английский', description: 'В этом году', date: '11.05.2024 17:52'},
+  {id: '1aab2c9d-1149-4aa1-a3ef-97bd3c2b3e8a', name: 'Выучить китайский', description: 'В следующем году', date: '11.05.2024 17:53'},
+  {id: '6aab2c9d-1147-4aa1-a3ef-97bd3c2b3e8a', name: 'Не сойти с ума', description: 'В этом году', date: '11.05.2024 17:53'}
 
 ];
 
@@ -83,12 +84,8 @@ app.use(async (ctx, next) => {
 app.use((ctx, next) => {
   if (ctx.request.method !== 'POST') {
     next();
-
     return;
   }
-
-  console.log(ctx.request.body);
-
   const { name, description } = ctx.request.body;
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
@@ -102,11 +99,72 @@ app.use((ctx, next) => {
 
   tickets.push({ id: generateUniqueId(), name, description, date: getCurrentDateTime() });
 
+  console.log(ctx.request.body)
+
   ctx.response.body = 'OK';
-  console.log(tickets)
   next();
 });
 
+
+app.use((ctx, next) => {
+  if (ctx.request.method !== 'PUT') {
+    next();
+    return;
+  }
+  const { name, description, uuid } = ctx.request.body;
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  if (tickets.some(sub => sub.name === name)) {
+    ctx.response.status = 400;
+    ctx.response.body = 'ticit exists';
+
+    return;
+  }
+
+  const index = tickets.findIndex(entry => entry.id === uuid);
+
+  if (index !== -1) {
+    tickets[index] = { id: uuid, name, description, date: getCurrentDateTime() };
+  }
+  console.log(ctx.request.body)
+
+  
+
+  ctx.response.body = 'OK';
+  next();
+});
+
+app.use((ctx, next) => {
+  if (ctx.request.method !== 'DELETE') {
+    next();
+    return;
+  }
+  const { name, description, uuid } = ctx.request.body;
+
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+
+  if (tickets.some(sub => sub.name === name)) {
+    ctx.response.status = 400;
+    ctx.response.body = 'ticit exists';
+
+    return;
+  }
+
+  const index = tickets.findIndex(entry => entry.id === uuid);
+
+  if (index !== -1) {
+    /*tickets[index] = { id: uuid, name, description, date: getCurrentDateTime() };*/
+  }
+  console.log(ctx.request.body)
+
+  
+
+  ctx.response.body = 'OK';
+  next();
+});
+
+console.log(tickets)
 const server = http.createServer(app.callback());
 
 const port = process.env.PORT || 7070;
