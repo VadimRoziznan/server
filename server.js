@@ -9,10 +9,11 @@ const uuid = require('uuid');
 const fs = require('fs');
 const cors = require('@koa/cors');
 
+
 const tickets = [
-  {id: '6226b804-0b73-47c5-adcc-a62ce79a2b26', name: 'Выучить английский', description: 'В этом году', date: '11.05.2024 17:52'},
-  {id: '1aab2c9d-1149-4aa1-a3ef-97bd3c2b3e8a', name: 'Выучить китайский', description: 'В следующем году', date: '11.05.2024 17:53'},
-  {id: '6aab2c9d-1147-4aa1-a3ef-97bd3c2b3e8a', name: 'Не сойти с ума', description: 'В этом году', date: '11.05.2024 17:53'}
+  {id: '6226b804-0b73-47c5-adcc-a62ce79a2b26', name: 'Выучить английский', description: 'В этом году', date: '11.05.2024 17:52', state: true},
+  {id: '1aab2c9d-1149-4aa1-a3ef-97bd3c2b3e8a', name: 'Выучить китайский', description: 'В следующем году', date: '11.05.2024 17:53', state: false},
+  {id: '6aab2c9d-1147-4aa1-a3ef-97bd3c2b3e8a', name: 'Не сойти с ума', description: 'В этом году', date: '11.05.2024 17:53', state: true}
 
 ];
 
@@ -33,7 +34,6 @@ function generateUniqueId() {
 
 
 const app = new Koa();
-
 
 const public = path.join(__dirname, '/public');
 
@@ -86,7 +86,7 @@ app.use((ctx, next) => {
     next();
     return;
   }
-  const { name, description } = ctx.request.body;
+  const { name, description, state } = ctx.request.body;
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
 
@@ -97,7 +97,7 @@ app.use((ctx, next) => {
     return;
   }
 
-  tickets.push({ id: generateUniqueId(), name, description, date: getCurrentDateTime() });
+  tickets.push({ id: generateUniqueId(), name, description, date: getCurrentDateTime(), state: state });
 
   console.log(ctx.request.body)
 
@@ -112,15 +112,8 @@ app.use((ctx, next) => {
     return;
   }
   const { name, description, uuid } = ctx.request.body;
-
+ 
   ctx.response.set('Access-Control-Allow-Origin', '*');
-
-  if (tickets.some(sub => sub.name === name)) {
-    ctx.response.status = 400;
-    ctx.response.body = 'ticit exists';
-
-    return;
-  }
 
   const index = tickets.findIndex(entry => entry.id === uuid);
 
@@ -128,8 +121,6 @@ app.use((ctx, next) => {
     tickets[index] = { id: uuid, name, description, date: getCurrentDateTime() };
   }
   console.log(ctx.request.body)
-
-  
 
   ctx.response.body = 'OK';
   next();
@@ -140,25 +131,19 @@ app.use((ctx, next) => {
     next();
     return;
   }
-  const { name, description, uuid } = ctx.request.body;
+
+  /*const { uuid } = ctx.request.body;*/
+  const uuid = ctx.request.query.uuid;
+  console.log(uuid)
 
   ctx.response.set('Access-Control-Allow-Origin', '*');
-
-  if (tickets.some(sub => sub.name === name)) {
-    ctx.response.status = 400;
-    ctx.response.body = 'ticit exists';
-
-    return;
-  }
 
   const index = tickets.findIndex(entry => entry.id === uuid);
 
   if (index !== -1) {
-    /*tickets[index] = { id: uuid, name, description, date: getCurrentDateTime() };*/
+    tickets.splice(index, 1);
   }
-  console.log(ctx.request.body)
 
-  
 
   ctx.response.body = 'OK';
   next();
